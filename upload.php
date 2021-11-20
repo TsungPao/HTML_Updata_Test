@@ -42,7 +42,10 @@ class Upload{
 			if(file_exists($this->filepath.'/'. $this->fileName)){
 				$data['code'] = 2;
 				$data['msg'] = 'success';
-				$data['file_path'] = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['DOCUMENT_URI']).str_replace('.','',$this->filepath).'/'. $this->fileName;
+				//$data['file_path'] = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['DOCUMENT_URI']).str_replace('.','',$this->filepath).'/'. $this->fileName;
+				//没有 $_SERVER['DOCUMENT_URI'] 这个服务器变量
+				//这个服务器变量在nginx有，apache无 ，iis无，改用其它通用变量即可解决。
+				$data['file_path'] = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['REQUEST_URI']).str_replace('.','',$this->filepath).'/'. $this->fileName;
 			}
 		}else{
 			if(file_exists($this->filepath.'/'. $this->fileName.'__'.$this->blobNum)){
