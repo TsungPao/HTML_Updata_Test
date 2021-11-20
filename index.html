@@ -110,9 +110,16 @@ function Upload() {
                     //所有文件块上传完成
                 }
             }, 1000);
+			if(xhr.readyState == 4 && xhr.status == 200){
+				temp_data = xhr.responseText;
+				getdata(temp_data);
+			}
         }
         xhr.send(form_data);
         //每次文件块上传后，清空上传信息
+		function getdata(data){
+			console.log(data);
+		}
         form_data = "";
     }
 }
