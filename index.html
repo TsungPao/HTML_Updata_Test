@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Document</title>
+</head>
+<body>
+<input type="file" id="file">
+<input type="button" id="upload" value="上传">
+<input type="button" id="stop" value="停止">
+<input type="button" id="restart" value="继续上传">
+上传进度：<span id="progress"></span>
+<script>
+//获取节点
+var fileForm = document.getElementById("file");
+var uploadBtn = document.getElementById('upload');
+var stopBtn = document.getElementById('stop');
+var restartBtn = document.getElementById('restart');
+//定义常量
+const LENGTH = 10000 * 1024;//每个上传的文件块大小(100KB)
+var start = 0;
+var end = LENGTH + start;
+var blob;
+var is_stop = 0;
+var blob_num = 1;
+var file = null;
+var upload_instance = new Upload();
+//上传事件
+uploadBtn.onclick = function () {
+   upload_instance.addFileAndSend(fileForm);
+   return false;
+}
+stopBtn.onclick = function () {
+   upload_instance.stop();
+   return false;
+}
+restartBtn.onclick = function () {
+   upload_instance.start();
+   return false;
+}
+function Upload() {
+    //判断浏览器类型
+    if (window.XMLHttpRequest){
+        //IE7+, Firefox, Chrome, Opera, Safari
+        var xhr=new XMLHttpRequest();
+    }else{
+        //IE6, IE5
+        var xhr=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+   //上传文件
+   this.addFileAndSend = function (that) {
+       file = that.files[0];
+       blob = cutFile(file);
+       //上传
+       uploadFile(blob, file);
+       blob_num += 1;
+   }
+   //停止文件上传
+   this.stop = function () {
+       xhr.abort();
+       is_stop = 1;
+   }
+   this.start = function () {
+       uploadFile(blob, file);
+       is_stop = 0;
+   }
+   //切割文件
+   function cutFile(file) {
+       var file_blob = file.slice(start, end);
+       start = end;
+       end = start + LENGTH;
+       return file_blob;
+   };
+    //上传文件
+    function uploadFile(blob, file) {
+        var form_data = new FormData();
+        var total_blob_num = Math.ceil(file.size / LENGTH);
+        //上传文件信息
+        form_data.append('file', blob);
+        //上传的第几个文件块
+        form_data.append('blob_num', blob_num);
+        //总文件块数
+        form_data.append('total_blob_num', total_blob_num);
+        //文件名称
+        form_data.append('file_name', file.name);
+        
+        
+        //上传
+        xhr.open('POST', './upload.php', false);
+        xhr.onreadystatechange = function () {
+            //获取上传进度
+            if (total_blob_num == 1) {
+                progressText = '100%';
+            } else {
+                progressText = (Math.min(100, (blob_num / total_blob_num) * 100)).toFixed(2) + '%';
+            }
+            var progress = document.getElementById('progress');
+            progress.innerHTML = progressText;
+            
+            //循环执行上传，直到所有文件块上传完成
+            var t = setTimeout(function () {
+                if (start < file.size && is_stop == 0) {
+                    blob = cutFile(file);
+                    uploadFile(blob, file);
+                    blob_num += 1;
+                } else {
+                    //所有文件块上传完成
+                }
+            }, 1000);
+        }
+        xhr.send(form_data);
+        //每次文件块上传后，清空上传信息
+        form_data = "";
+    }
+}
+</script>
+</body>
+</html>
