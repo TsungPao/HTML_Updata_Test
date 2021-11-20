@@ -66,4 +66,4 @@ $upload = new Upload($_FILES['file']['tmp_name'],$_POST['blob_num'],$_POST['tota
 //呼叫方法，返回結果
 $data = $upload->apiReturn();
 header('Content-type: application/json');
-//return json_encode($data);
+return json_encode($data);
