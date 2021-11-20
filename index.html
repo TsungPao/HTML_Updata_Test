@@ -20,7 +20,7 @@ var uploadBtn = document.getElementById('upload');
 var stopBtn = document.getElementById('stop');
 var restartBtn = document.getElementById('restart');
 //定义常量
-const LENGTH = 10000 * 1024;//每个上传的文件块大小(100KB)
+const LENGTH = 1024 * 1024;//每个上传的文件块大小(1MB)
 var start = 0;
 var end = LENGTH + start;
 var blob;
@@ -89,8 +89,8 @@ function Upload() {
         
         
         //上传
-        xhr.open('POST', './upload.php', false);
-        xhr.onreadystatechange = function () {
+        xhr.open('POST', './upload.php', true);
+        xhr.onload = function () {
             //获取上传进度
             if (total_blob_num == 1) {
                 progressText = '100%';
